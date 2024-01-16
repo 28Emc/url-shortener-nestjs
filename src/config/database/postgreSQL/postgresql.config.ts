@@ -1,7 +1,9 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DB_HOST, DB_PASSWORD, DB_CORE_NAME, DB_SOCKET_PATH, DB_USER, ENV_FILE_PATH, LOCAL, POSTGRES, NODE_ENV, CORE } from '../../../common/constants/constants';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
-// import { User } from '../../../models/user/entities/user.entity';
+import { User } from 'src/models/user/entities/user.entity';
+import { Url } from 'src/models/url/entities/url.entity';
+import { Statistic } from 'src/models/statistic/entities/statistic.entity';
 
 ConfigModule.forRoot({
   envFilePath: ENV_FILE_PATH,
@@ -36,5 +38,5 @@ export const typeOrmOptionsCore: PostgresConnectionOptions = {
   ...typeOrmOptions,
   name: CORE,
   database: configService.get<string>(DB_CORE_NAME),
-  entities: [/* User */],
+  entities: [User, Url, Statistic],
 };

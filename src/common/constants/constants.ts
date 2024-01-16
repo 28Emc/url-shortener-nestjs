@@ -16,3 +16,4 @@ export const LOCAL = 'local';
 export const X_API_KEY = 'x-api-key';
 export const USER = 'user';
 export const IS_PUBLIC = 'isPublic';
+export const MAX_URL_PER_USER = 1;
