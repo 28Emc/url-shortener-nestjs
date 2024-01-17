@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
+import { UpdateUrlCountsDto } from './dto/update-url-counts.dto';
 
 @Controller('/api/urls')
 export class UrlController {
@@ -27,9 +28,19 @@ export class UrlController {
     return this.urlService.findOne(+id);
   }
 
+  @Get('/uuid/:uuid')
+  findOneByUUID(@Param('uuid') uuid: string) {
+    return this.urlService.findOneByUUID(uuid);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUrlDto: UpdateUrlDto) {
     return this.urlService.update(+id, updateUrlDto);
+  }
+
+  @Patch('/counts')
+  updateCounts(@Body() updateUrlCountsDto: UpdateUrlCountsDto) {
+    return this.urlService.updateCounts(updateUrlCountsDto);
   }
 
   @Delete(':uuid')

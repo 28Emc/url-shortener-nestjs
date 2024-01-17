@@ -7,6 +7,7 @@ import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { Url } from './entities/url.entity';
 import { User } from '../user/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { UpdateUrlCountsDto } from './dto/update-url-counts.dto';
 
 @Injectable()
 export class UrlService {
@@ -134,6 +135,28 @@ export class UrlService {
     };
   }
 
+  async findOneByUUID(uuid: string) {
+    const urlFound: Url = await this.urlRepository.findOne({
+      loadRelationIds: {
+        relations: ['user'],
+        disableMixedMap: true
+      },
+      where: {
+        uuid: uuid
+      }
+    });
+    if (!urlFound) {
+      throw new NotFoundException({
+        'message': 'There was an error while fetching url',
+        'details': 'Url not found'
+      });
+    }
+    return {
+      'message': 'Url data retrieved successfully',
+      'details': urlFound
+    };
+  }
+
   async update(id: number, updateUrlDto: UpdateUrlDto) {
     const updatedUrl: UpdateResult = await this.urlRepository.update({
       urlId: id
@@ -149,6 +172,24 @@ export class UrlService {
     return {
       'message': 'Url values updated successfully',
       'details': null
+    };
+  }
+
+  async updateCounts(updateUrlCountsDto: UpdateUrlCountsDto) {
+    const updatedUrl: UpdateResult = await this.urlRepository.update({
+      urlId: +updateUrlCountsDto.urlId
+    }, {
+      clickNro: updateUrlCountsDto.clickNro
+    });
+    if (!updatedUrl.affected) {
+      throw new NotFoundException({
+        'message': 'There was an error while updating the url',
+        'details': 'Url not found'
+      });
+    }
+    return {
+      'message': 'Url values updated successfully',
+      'details': updatedUrl
     };
   }
 

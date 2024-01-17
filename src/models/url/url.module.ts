@@ -12,5 +12,6 @@ import { User } from '../user/entities/user.entity';
   imports: [
     TypeOrmModule.forFeature([User, Url], CORE)
   ],
+  exports: [UrlService],
 })
 export class UrlModule { }

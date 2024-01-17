@@ -20,6 +20,9 @@ export const CustomValidationErrors = {
         }
     },
     "url": {
+        "urlId": {
+            "isNotEmpty": "Url ID required"
+        },
         "userId": {
             "isNotEmpty": "User ID required"
         },
@@ -41,6 +44,9 @@ export const CustomValidationErrors = {
         }
     },
     "statistic": {
+        "urlId": {
+            "isNotEmpty": "Url ID required"
+        },
         "browserInfo": {
             "isNotEmpty": "Browser info required"
         },

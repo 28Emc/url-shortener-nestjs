@@ -1,45 +1,38 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
-import { CORE } from './common/constants/constants';
 import { Url } from './models/url/entities/url.entity';
-import { Statistic } from './models/statistic/entities/statistic.entity';
 import { Request } from 'express';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { StatisticService } from './models/statistic/statistic.service';
+import { UrlService } from './models/url/url.service';
 
 @Injectable()
 export class AppService {
   constructor(
-    @InjectRepository(Url, CORE)
-    private readonly urlRepository: Repository<Url>,
-    @InjectRepository(Statistic, CORE)
-    private readonly statisticRepository: Repository<Statistic>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private urlService: UrlService,
+    private statisticService: StatisticService
   ) { }
+
   getHello(): string {
     return 'Hello World!';
   }
 
   async redirectFromShortUrl(req: Request, urlUUID: string): Promise<string> {
-    const urlFound: Url = await this.urlRepository.findOne({
-      where: {
-        uuid: urlUUID
-      }
-    });
-    if (!urlFound) {
+    const urlFoundResponse = await this.urlService.findOneByUUID(urlUUID);
+    let urlFound: Url = urlFoundResponse.details;
+    if (!urlFound?.urlId) {
       throw new NotFoundException({
         'message': 'There was an error',
         'details': 'Url not found'
       });
     }
-    const updatedUrl: UpdateResult = await this.urlRepository.update({
-      urlId: urlFound.urlId
-    }, {
+    const updatedUrlResponse = await this.urlService.updateCounts({
+      urlId: urlFound.urlId.toString(),
       clickNro: urlFound.clickNro + 1
     });
-    if (!updatedUrl.affected) {
+    if (!updatedUrlResponse.details.affected) {
       throw new InternalServerErrorException({
         'message': 'There was an error',
         'details': 'Url not found'
@@ -50,12 +43,12 @@ export class AppService {
     if (this.isValidLocation(location.data)) {
       fullLocation = location['ip'] + '|' + location['city'] + '|' + location['country_name'] + '|' + location['country_code'] + '|' + location['latitude'] + '|' + location['longitude'];
     }
-    const createdStatistic: Statistic = await this.statisticRepository.save({
-      url: urlFound,
+    const createdStatisticResponse = await this.statisticService.create({
+      urlId: urlFound.urlId.toString(),
       browserInfo: req.headers['user-agent'],
       locationInfo: fullLocation
     });
-    if (!createdStatistic.statisticId) {
+    if (!createdStatisticResponse.details.statisticId) {
       throw new InternalServerErrorException({
         'message': 'There was an error',
         'details': 'Internal server error'

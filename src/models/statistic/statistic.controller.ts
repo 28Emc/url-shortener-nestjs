@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { StatisticService } from './statistic.service';
 import { CreateStatisticDto } from './dto/create-statistic.dto';
-import { UpdateStatisticDto } from './dto/update-statistic.dto';
 
 @Controller('statistic')
 export class StatisticController {
-  constructor(private readonly statisticService: StatisticService) {}
+  constructor(private readonly statisticService: StatisticService) { }
 
   @Post()
   create(@Body() createStatisticDto: CreateStatisticDto) {
@@ -17,18 +16,8 @@ export class StatisticController {
     return this.statisticService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.statisticService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStatisticDto: UpdateStatisticDto) {
-    return this.statisticService.update(+id, updateStatisticDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.statisticService.remove(+id);
+  @Get(':urlId')
+  findByUrlId(@Param('urlId') urlId: string) {
+    return this.statisticService.findByUrlId(urlId);
   }
 }
