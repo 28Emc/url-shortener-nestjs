@@ -5,6 +5,7 @@ import { CORE } from 'src/common/constants/constants';
 import { Repository } from 'typeorm';
 import { Url } from '../url/entities/url.entity';
 import { Statistic } from './entities/statistic.entity';
+import { ApiResponseListDto, ApiResponseObjectDto } from 'src/common/dtos/api-response.dto';
 
 @Injectable()
 export class StatisticService {
@@ -15,7 +16,7 @@ export class StatisticService {
     private readonly statisticRepository: Repository<Statistic>
   ) { }
 
-  async create(createStatisticDto: CreateStatisticDto) {
+  async create(createStatisticDto: CreateStatisticDto): Promise<ApiResponseObjectDto<Statistic>> {
     const urlFound: Url = await this.urlRepository.findOne({
       where: {
         urlId: +createStatisticDto.urlId
@@ -38,7 +39,7 @@ export class StatisticService {
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<ApiResponseListDto<Statistic>> {
     const statisticList: Statistic[] = await this.statisticRepository.find({
       loadRelationIds: {
         relations: ['url'],
@@ -57,7 +58,7 @@ export class StatisticService {
     };
   }
 
-  async findByUrlId(urlId: string) {
+  async findByUrlId(urlId: string): Promise<ApiResponseListDto<Statistic>> {
     const statiticList: Statistic[] = await this.statisticRepository.find({
       loadRelationIds: {
         relations: ['url'],

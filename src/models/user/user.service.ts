@@ -9,6 +9,7 @@ import { UpdateStatusUserDto } from './dto/update-status-user.dto';
 import { Status } from 'src/common/enums/enums';
 import { DateTime } from "luxon";
 import * as bcrypt from "bcrypt";
+import { ApiResponseListDto, ApiResponseObjectDto } from 'src/common/dtos/api-response.dto';
 
 @Injectable()
 export class UserService {
@@ -17,7 +18,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) { }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<ApiResponseObjectDto<string>> {
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
     const user: User = this.userRepository.create(createUserDto);
     const { password, ...createdUser } = await this.userRepository.save({
@@ -31,11 +32,11 @@ export class UserService {
     }
     return {
       'message': 'User created successfully',
-      'details': null
+      'details': ''
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<ApiResponseListDto<User>> {
     const userList: User[] = await this.userRepository.find({
       select: {
         password: false
@@ -53,7 +54,7 @@ export class UserService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<ApiResponseObjectDto<User>> {
     const userFound: User = await this.userRepository.findOne({
       where: {
         userId: id
@@ -74,7 +75,7 @@ export class UserService {
     };
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<ApiResponseObjectDto<string>> {
     const updatedUser: UpdateResult = await this.userRepository.update({
       userId: id
     }, {
@@ -88,11 +89,11 @@ export class UserService {
     }
     return {
       'message': 'User values updated successfully',
-      'details': null
+      'details': ''
     };
   }
 
-  async remove(id: number, updateStatusDTO: UpdateStatusUserDto) {
+  async remove(id: number, updateStatusDTO: UpdateStatusUserDto): Promise<ApiResponseObjectDto<string>> {
     const deletedUser: UpdateResult = await this.userRepository.update({
       userId: id
     }, {
@@ -109,11 +110,11 @@ export class UserService {
     }
     return {
       'message': 'User removed successfully',
-      'details': null
+      'details': ''
     };
   }
 
-  async restore(id: number, updateStatusDTO: UpdateStatusUserDto) {
+  async restore(id: number, updateStatusDTO: UpdateStatusUserDto): Promise<ApiResponseObjectDto<string>> {
     const restoredUser: UpdateResult = await this.userRepository.update({
       userId: id
     }, {
@@ -130,7 +131,7 @@ export class UserService {
     }
     return {
       'message': 'User restored successfully',
-      'details': null
+      'details': ''
     };
   }
 }

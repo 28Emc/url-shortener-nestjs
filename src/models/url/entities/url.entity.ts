@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Status } from "src/common/enums/enums";
 import { Statistic } from "src/models/statistic/entities/statistic.entity";
 import { User } from "src/models/user/entities/user.entity";
@@ -10,15 +10,15 @@ export class Url {
     @PrimaryGeneratedColumn({ name: 'u_id' })
     urlId: number;
 
-    @ApiProperty({ name: 'uuid', type: 'string' })
+    @ApiProperty({ name: 'uuid' })
     @Column({ name: 'u_uuid', type: 'varchar', length: 255, nullable: false })
     uuid: string;
 
-    @ApiProperty({ name: 'originalUrl', type: 'string' })
+    @ApiProperty({ name: 'originalUrl' })
     @Column({ name: 'u_original_url', type: 'varchar', length: 255, nullable: false })
     originalUrl: string;
 
-    @ApiProperty({ name: 'shortUrl', type: 'string' })
+    @ApiProperty({ name: 'shortUrl' })
     @Column({ name: 'u_short_url', type: 'varchar', length: 255, nullable: false })
     shortUrl: string;
 
@@ -36,10 +36,12 @@ export class Url {
     @Column({ name: 'u_created_by', type: 'varchar', length: 255 })
     createdBy: string;
 
+    @ApiHideProperty()
     @ManyToOne(() => User, (user) => user.urls)
     @JoinColumn({ name: "user_id" })
     user: User;
 
+    @ApiHideProperty()
     @OneToMany(() => Statistic, (statistic) => statistic.url)
     statistics: Statistic[];
 }

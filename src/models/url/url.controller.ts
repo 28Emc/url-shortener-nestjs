@@ -3,7 +3,7 @@ import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { UpdateUrlCountsDto } from './dto/update-url-counts.dto';
-import { ApiBody, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiExcludeEndpoint, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ApiResponseListDto, ApiResponseObjectDto, ApiResponseErrorDto } from 'src/common/dtos/api-response.dto';
 import { Url } from './entities/url.entity';
 
@@ -62,6 +62,7 @@ export class UrlController {
     return this.urlService.findOneByUUID(uuid);
   }
 
+  @ApiExcludeEndpoint()
   @ApiOperation({ summary: 'Endpoint to update the url.', operationId: 'update-url' })
   @ApiCreatedResponse({ description: 'Url updated', type: ApiResponseObjectDto<string> })
   @ApiNotFoundResponse({ description: 'Url not found', type: ApiResponseErrorDto })
