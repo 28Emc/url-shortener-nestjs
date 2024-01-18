@@ -8,6 +8,7 @@ import { Url } from './entities/url.entity';
 import { User } from '../user/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { UpdateUrlCountsDto } from './dto/update-url-counts.dto';
+import { ApiResponseListDto, ApiResponseObjectDto } from 'src/common/dtos/api-response.dto';
 
 @Injectable()
 export class UrlService {
@@ -19,7 +20,7 @@ export class UrlService {
     private configService: ConfigService
   ) { }
 
-  async create(createUrlDto: CreateUrlDto) {
+  async create(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
     const userFound: User = await this.userRepository.findOne({
       where: {
         userId: +createUrlDto.userId
@@ -70,7 +71,7 @@ export class UrlService {
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<ApiResponseListDto<Url>> {
     const urlList: Url[] = await this.urlRepository.find({
       loadRelationIds: {
         relations: ['user'],
@@ -89,7 +90,7 @@ export class UrlService {
     };
   }
 
-  async findAllByUserId(userId: number) {
+  async findAllByUserId(userId: number): Promise<ApiResponseListDto<Url>> {
     const urlList: Url[] = await this.urlRepository.find({
       loadRelationIds: {
         relations: ['user'],
@@ -113,7 +114,7 @@ export class UrlService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<ApiResponseObjectDto<Url>> {
     const urlFound: Url = await this.urlRepository.findOne({
       loadRelationIds: {
         relations: ['user'],
@@ -135,7 +136,7 @@ export class UrlService {
     };
   }
 
-  async findOneByUUID(uuid: string) {
+  async findOneByUUID(uuid: string): Promise<ApiResponseObjectDto<Url>> {
     const urlFound: Url = await this.urlRepository.findOne({
       loadRelationIds: {
         relations: ['user'],
@@ -157,7 +158,7 @@ export class UrlService {
     };
   }
 
-  async update(id: number, updateUrlDto: UpdateUrlDto) {
+  async update(id: number, updateUrlDto: UpdateUrlDto): Promise<ApiResponseObjectDto<string>> {
     const updatedUrl: UpdateResult = await this.urlRepository.update({
       urlId: id
     }, {
@@ -171,29 +172,44 @@ export class UrlService {
     }
     return {
       'message': 'Url values updated successfully',
-      'details': null
+      'details': ''
     };
   }
 
-  async updateCounts(updateUrlCountsDto: UpdateUrlCountsDto) {
-    const updatedUrl: UpdateResult = await this.urlRepository.update({
-      urlId: +updateUrlCountsDto.urlId
-    }, {
-      clickNro: updateUrlCountsDto.clickNro
+  async updateCounts(updateUrlCountsDto: UpdateUrlCountsDto): Promise<ApiResponseObjectDto<{ urlId: number, originalUrl: string }>> {
+    const urlFound: Url = await this.urlRepository.findOne({
+      where: {
+        uuid: updateUrlCountsDto.uuid
+      }
     });
-    if (!updatedUrl.affected) {
+    if (!urlFound) {
       throw new NotFoundException({
         'message': 'There was an error while updating the url',
         'details': 'Url not found'
       });
     }
+    const finalCount: number = updateUrlCountsDto.clickNro === 1 ? urlFound.clickNro + 1 : updateUrlCountsDto.clickNro;
+    const updatedUrl: UpdateResult = await this.urlRepository.update({
+      urlId: urlFound.urlId
+    }, {
+      clickNro: finalCount
+    });
+    if (!updatedUrl.affected) {
+      throw new InternalServerErrorException({
+        'message': 'There was an error while updating the url',
+        'details': 'Internal server error'
+      });
+    }
     return {
       'message': 'Url values updated successfully',
-      'details': updatedUrl
+      'details': {
+        urlId: +urlFound.urlId,
+        originalUrl: urlFound.originalUrl
+      }
     };
   }
 
-  async remove(uuid: string) {
+  async remove(uuid: string): Promise<ApiResponseObjectDto<string>> {
     const deletedUrl: DeleteResult = await this.urlRepository.delete({
       uuid: uuid
     });
@@ -205,7 +221,7 @@ export class UrlService {
     }
     return {
       'message': 'Url deleted successfully',
-      'details': null
+      'details': ''
     };
   }
 

@@ -23,6 +23,9 @@ export const CustomValidationErrors = {
         "urlId": {
             "isNotEmpty": "Url ID required"
         },
+        "uuid": {
+            "isNotEmpty": "UUID required"
+        },
         "userId": {
             "isNotEmpty": "User ID required"
         },
@@ -46,6 +49,9 @@ export const CustomValidationErrors = {
     "statistic": {
         "urlId": {
             "isNotEmpty": "Url ID required"
+        },
+        "uuid": {
+            "isNotEmpty": "UUID required"
         },
         "browserInfo": {
             "isNotEmpty": "Browser info required"

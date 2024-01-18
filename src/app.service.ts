@@ -6,33 +6,28 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { StatisticService } from './models/statistic/statistic.service';
 import { UrlService } from './models/url/url.service';
+import { PORT } from './common/constants/constants';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppService {
   constructor(
     private readonly httpService: HttpService,
     private urlService: UrlService,
-    private statisticService: StatisticService
+    private statisticService: StatisticService,
+    private configService: ConfigService
   ) { }
 
-  getHello(): string {
-    return 'Hello World!';
+  ping(): string {
+    return `Url shortener API listening on port ${this.configService.get<string>(PORT)}`;
   }
 
-  async redirectFromShortUrl(req: Request, urlUUID: string): Promise<string> {
-    const urlFoundResponse = await this.urlService.findOneByUUID(urlUUID);
-    let urlFound: Url = urlFoundResponse.details;
-    if (!urlFound?.urlId) {
-      throw new NotFoundException({
-        'message': 'There was an error',
-        'details': 'Url not found'
-      });
-    }
+  async redirectFromShortUrl(req: Request, urlUUID: string) {
     const updatedUrlResponse = await this.urlService.updateCounts({
-      urlId: urlFound.urlId.toString(),
-      clickNro: urlFound.clickNro + 1
+      uuid: urlUUID,
+      clickNro: 1
     });
-    if (!updatedUrlResponse.details.affected) {
+    if (!updatedUrlResponse.details.urlId) {
       throw new InternalServerErrorException({
         'message': 'There was an error',
         'details': 'Url not found'
@@ -44,7 +39,7 @@ export class AppService {
       fullLocation = location['ip'] + '|' + location['city'] + '|' + location['country_name'] + '|' + location['country_code'] + '|' + location['latitude'] + '|' + location['longitude'];
     }
     const createdStatisticResponse = await this.statisticService.create({
-      urlId: urlFound.urlId.toString(),
+      urlId: updatedUrlResponse.details.urlId.toString(),
       browserInfo: req.headers['user-agent'],
       locationInfo: fullLocation
     });
@@ -54,7 +49,7 @@ export class AppService {
         'details': 'Internal server error'
       });
     }
-    return urlFound.originalUrl;
+    return updatedUrlResponse.details.originalUrl;
   }
 
   private async findLocationByReqIP(ip: string): Promise<AxiosResponse<any>> {

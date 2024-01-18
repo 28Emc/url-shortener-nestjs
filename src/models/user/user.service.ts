@@ -41,7 +41,6 @@ export class UserService {
         password: false
       }
     });
-    console.log('userList', userList)
     if (!userList) {
       throw new InternalServerErrorException({
         'message': 'There was an error while fetching users',
