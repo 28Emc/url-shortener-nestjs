@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -19,20 +19,30 @@ export class UserService {
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<ApiResponseObjectDto<string>> {
+    const userFound: User = await this.userRepository.findOne({
+      where: {
+        email: createUserDto.email
+      }
+    });
+    if (userFound) {
+      throw new BadRequestException('User already exists',
+        {
+          description: 'There was an error while registering user'
+        });
+    }
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
     const user: User = this.userRepository.create(createUserDto);
     const { password, ...createdUser } = await this.userRepository.save({
       ...user
     });
     if (!createdUser.userId) {
-      throw new InternalServerErrorException({
-        'message': 'There was an error while creating the user',
-        'details': 'Internal server error'
+      throw new InternalServerErrorException('Application error', {
+        description: 'There was an error while creating the user'
       });
     }
     return {
       'message': 'User created successfully',
-      'details': ''
+      'detail': ''
     };
   }
 
@@ -43,14 +53,13 @@ export class UserService {
       }
     });
     if (!userList) {
-      throw new InternalServerErrorException({
-        'message': 'There was an error while fetching users',
-        'details': 'Internal server error'
+      throw new InternalServerErrorException('Application error', {
+        description: 'There was an error while fetching users'
       });
     }
     return {
       'message': 'User data retrieved successfully',
-      'details': userList
+      'detail': userList
     };
   }
 
@@ -64,14 +73,13 @@ export class UserService {
       }
     });
     if (!userFound) {
-      throw new NotFoundException({
-        'message': 'There was an error while fetching user',
-        'details': 'User not found'
+      throw new NotFoundException('User not found', {
+        description: 'There was an error while fetching user'
       });
     }
     return {
       'message': 'User data retrieved successfully',
-      'details': userFound
+      'detail': userFound
     };
   }
 
@@ -82,14 +90,13 @@ export class UserService {
       ...updateUserDto
     });
     if (!updatedUser.affected) {
-      throw new NotFoundException({
-        'message': 'There was an error while updating the user',
-        'details': 'User not found'
+      throw new NotFoundException('User not found', {
+        description: 'There was an error while updating the user'
       });
     }
     return {
       'message': 'User values updated successfully',
-      'details': ''
+      'detail': ''
     };
   }
 
@@ -103,14 +110,13 @@ export class UserService {
       status: Status.INACTIVE
     });
     if (!deletedUser.affected) {
-      throw new NotFoundException({
-        'message': 'There was an error while deleting the user',
-        'details': 'User not found'
+      throw new NotFoundException('User not found', {
+        description: 'There was an error while deleting the user'
       });
     }
     return {
       'message': 'User removed successfully',
-      'details': ''
+      'detail': ''
     };
   }
 
@@ -124,14 +130,13 @@ export class UserService {
       status: Status.ACTIVE
     });
     if (!restoredUser.affected) {
-      throw new NotFoundException({
-        'message': 'There was an error while restoring the user',
-        'details': 'User not found'
+      throw new NotFoundException('User not found', {
+        description: 'There was an error while restoring the user'
       });
     }
     return {
       'message': 'User restored successfully',
-      'details': ''
+      'detail': ''
     };
   }
 }

@@ -20,7 +20,7 @@ export class UrlService {
     private configService: ConfigService
   ) { }
 
-  async create(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
+  async createUnlimited(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
     const userFound: User = await this.userRepository.findOne({
       where: {
         userId: +createUrlDto.userId
@@ -29,20 +29,7 @@ export class UrlService {
     if (!userFound) {
       throw new NotFoundException({
         'message': 'There was an error while creating the url',
-        'details': 'User not found'
-      });
-    }
-    const previousUrls: Url[] = await this.urlRepository.find({
-      where: {
-        user: {
-          userId: +createUrlDto.userId
-        }
-      }
-    });
-    if (previousUrls?.length + 1 > MAX_URL_PER_USER) {
-      throw new InternalServerErrorException({
-        'message': 'There was an error while fetching urls',
-        'details': 'You have reached the limit for creating more short URLs.'
+        'detail': 'User not found'
       });
     }
     const randomUUID: string = this.generateRandomUUID();
@@ -62,12 +49,63 @@ export class UrlService {
     if (!createdUrl.urlId) {
       throw new InternalServerErrorException({
         'message': 'There was an error while creating the url',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
     return {
       'message': 'Url created successfully',
-      'details': createdUrl.shortUrl
+      'detail': createdUrl.shortUrl
+    };
+  }
+
+  async createRestricted(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
+    const userFound: User = await this.userRepository.findOne({
+      where: {
+        userId: +createUrlDto.userId
+      }
+    })
+    if (!userFound) {
+      throw new NotFoundException({
+        'message': 'There was an error while creating the url',
+        'detail': 'User not found'
+      });
+    }
+    const previousUrls: Url[] = await this.urlRepository.find({
+      where: {
+        user: {
+          userId: +createUrlDto.userId
+        }
+      }
+    });
+    if (previousUrls?.length + 1 > MAX_URL_PER_USER) {
+      throw new InternalServerErrorException({
+        'message': 'There was an error while fetching urls',
+        'detail': 'You have reached the limit for creating more short URLs.'
+      });
+    }
+    const randomUUID: string = this.generateRandomUUID();
+    const domain: string = this.configService.get<string>(NODE_ENV) === 'local' ?
+      `${this.configService.get<string>(BASE_URL)}:${this.configService.get<string>(PORT)}` :
+      `${this.configService.get<string>(BASE_URL)}`;
+    const url: Url = this.urlRepository.create({
+      ...createUrlDto,
+      uuid: randomUUID,
+      shortUrl: `${domain}/${randomUUID}`,
+      clickNro: 0,
+      user: userFound
+    });
+    const { ...createdUrl } = await this.urlRepository.save({
+      ...url
+    });
+    if (!createdUrl.urlId) {
+      throw new InternalServerErrorException({
+        'message': 'There was an error while creating the url',
+        'detail': 'Internal server error'
+      });
+    }
+    return {
+      'message': 'Url created successfully',
+      'detail': createdUrl.shortUrl
     };
   }
 
@@ -81,12 +119,12 @@ export class UrlService {
     if (!urlList) {
       throw new InternalServerErrorException({
         'message': 'There was an error while fetching urls',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
     return {
       'message': 'Url data retrieved successfully',
-      'details': urlList
+      'detail': urlList
     };
   }
 
@@ -105,12 +143,12 @@ export class UrlService {
     if (!urlList) {
       throw new InternalServerErrorException({
         'message': 'There was an error while fetching urls',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
     return {
       'message': 'Url data retrieved successfully',
-      'details': urlList
+      'detail': urlList
     };
   }
 
@@ -127,12 +165,12 @@ export class UrlService {
     if (!urlFound) {
       throw new NotFoundException({
         'message': 'There was an error while fetching url',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     return {
       'message': 'Url data retrieved successfully',
-      'details': urlFound
+      'detail': urlFound
     };
   }
 
@@ -149,12 +187,12 @@ export class UrlService {
     if (!urlFound) {
       throw new NotFoundException({
         'message': 'There was an error while fetching url',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     return {
       'message': 'Url data retrieved successfully',
-      'details': urlFound
+      'detail': urlFound
     };
   }
 
@@ -167,12 +205,12 @@ export class UrlService {
     if (!updatedUrl.affected) {
       throw new NotFoundException({
         'message': 'There was an error while updating the url',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     return {
       'message': 'Url values updated successfully',
-      'details': ''
+      'detail': ''
     };
   }
 
@@ -185,7 +223,7 @@ export class UrlService {
     if (!urlFound) {
       throw new NotFoundException({
         'message': 'There was an error while updating the url',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     const finalCount: number = updateUrlCountsDto.clickNro === 1 ? urlFound.clickNro + 1 : updateUrlCountsDto.clickNro;
@@ -197,12 +235,12 @@ export class UrlService {
     if (!updatedUrl.affected) {
       throw new InternalServerErrorException({
         'message': 'There was an error while updating the url',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
     return {
       'message': 'Url values updated successfully',
-      'details': {
+      'detail': {
         urlId: +urlFound.urlId,
         originalUrl: urlFound.originalUrl
       }
@@ -216,12 +254,12 @@ export class UrlService {
     if (!deletedUrl.affected) {
       throw new NotFoundException({
         'message': 'There was an error while deleting the url',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     return {
       'message': 'Url deleted successfully',
-      'details': ''
+      'detail': ''
     };
   }
 

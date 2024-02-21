@@ -25,7 +25,7 @@ export class StatisticService {
     if (!urlFound) {
       throw new NotFoundException({
         'message': 'There was an error while creating the statistic',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     const createdStatistic: Statistic = await this.statisticRepository.save({
@@ -35,7 +35,7 @@ export class StatisticService {
     });
     return {
       'message': 'Statistic created successfully',
-      'details': createdStatistic
+      'detail': createdStatistic
     };
   }
 
@@ -49,12 +49,12 @@ export class StatisticService {
     if (!statisticList) {
       throw new InternalServerErrorException({
         'message': 'There was an error while fetching statistic',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
     return {
       'message': 'Statistic data retrieved successfully',
-      'details': statisticList
+      'detail': statisticList
     };
   }
 
@@ -73,12 +73,12 @@ export class StatisticService {
     if (!statiticList) {
       throw new InternalServerErrorException({
         'message': 'There was an error while fetching statitics',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
     return {
       'message': 'statitics data retrieved successfully',
-      'details': statiticList
+      'detail': statiticList
     };
   }
 }

@@ -5,7 +5,7 @@ export class ApiResponseErrorDto {
     message: string;
 
     @ApiProperty({ description: 'Response error detail payload (or error detail list)', example: [] })
-    details: [];
+    detail: [];
 }
 
 export class ApiResponseListDto<T> {
@@ -13,7 +13,7 @@ export class ApiResponseListDto<T> {
     message: string;
 
     @ApiProperty({ description: 'Response list payload', example: [] })
-    details: T[];
+    detail: T[];
 }
 
 export class ApiResponseObjectDto<T> {
@@ -21,5 +21,5 @@ export class ApiResponseObjectDto<T> {
     message: string;
 
     @ApiProperty({ description: 'Response object payload', example: {} })
-    details: T;
+    detail: T;
 }

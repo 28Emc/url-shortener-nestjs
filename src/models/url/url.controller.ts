@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
@@ -6,6 +6,7 @@ import { UpdateUrlCountsDto } from './dto/update-url-counts.dto';
 import { ApiBody, ApiCreatedResponse, ApiExcludeEndpoint, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ApiResponseListDto, ApiResponseObjectDto, ApiResponseErrorDto } from 'src/common/dtos/api-response.dto';
 import { Url } from './entities/url.entity';
+import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
 
 @ApiTags('Url')
 @Controller('v1/api/urls')
@@ -15,12 +16,23 @@ export class UrlController {
   @ApiOperation({ summary: 'Endpoint to create a short url.', operationId: 'post-url' })
   @ApiCreatedResponse({ description: 'Url created', type: ApiResponseObjectDto<Url> })
   @ApiNotFoundResponse({ description: 'User not found', type: ApiResponseErrorDto })
-  @ApiInternalServerErrorResponse({ description: 'You have reached the limit for creating more short URLs.', type: ApiResponseErrorDto })
   @ApiBody({ type: CreateUrlDto, required: true })
   @HttpCode(HttpStatus.CREATED)
   @Post()
   create(@Body() createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
-    return this.urlService.create(createUrlDto);
+    return this.urlService.createUnlimited(createUrlDto);
+  }
+
+  @ApiOperation({ summary: 'Endpoint to create a short url, only by user.', operationId: 'post-url-user' })
+  @ApiCreatedResponse({ description: 'Url created', type: ApiResponseObjectDto<Url> })
+  @ApiNotFoundResponse({ description: 'User not found', type: ApiResponseErrorDto })
+  @ApiInternalServerErrorResponse({ description: 'You have reached the limit for creating more short URLs.', type: ApiResponseErrorDto })
+  @ApiBody({ type: CreateUrlDto, required: true })
+  @HttpCode(HttpStatus.CREATED)
+  @Post('/user')
+  @UseGuards(ApiKeyGuard)
+  createByUser(@Body() createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
+    return this.urlService.createRestricted(createUrlDto);
   }
 
   @ApiOperation({ summary: 'Endpoint to fetch all urls.', operationId: 'fetch-url' })

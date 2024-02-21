@@ -15,7 +15,7 @@ export class BadRequestExceptionFilter implements ExceptionFilter {
             .status(status)
             .json({
                 'message': customResponse['error'],
-                'details': customResponse['message']
+                'detail': customResponse['message']
             });
     }
 }

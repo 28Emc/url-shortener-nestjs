@@ -27,10 +27,10 @@ export class AppService {
       uuid: urlUUID,
       clickNro: 1
     });
-    if (!updatedUrlResponse.details.urlId) {
+    if (!updatedUrlResponse.detail.urlId) {
       throw new InternalServerErrorException({
         'message': 'There was an error',
-        'details': 'Url not found'
+        'detail': 'Url not found'
       });
     }
     const location = await this.findLocationByReqIP(req.ip);
@@ -39,17 +39,17 @@ export class AppService {
       fullLocation = location['ip'] + '|' + location['city'] + '|' + location['country_name'] + '|' + location['country_code'] + '|' + location['latitude'] + '|' + location['longitude'];
     }
     const createdStatisticResponse = await this.statisticService.create({
-      urlId: updatedUrlResponse.details.urlId.toString(),
+      urlId: updatedUrlResponse.detail.urlId.toString(),
       browserInfo: req.headers['user-agent'],
       locationInfo: fullLocation
     });
-    if (!createdStatisticResponse.details.statisticId) {
+    if (!createdStatisticResponse.detail.statisticId) {
       throw new InternalServerErrorException({
         'message': 'There was an error',
-        'details': 'Internal server error'
+        'detail': 'Internal server error'
       });
     }
-    return updatedUrlResponse.details.originalUrl;
+    return updatedUrlResponse.detail.originalUrl;
   }
 
   private async findLocationByReqIP(ip: string): Promise<AxiosResponse<any>> {
