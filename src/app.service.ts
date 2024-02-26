@@ -1,12 +1,11 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Url } from './models/url/entities/url.entity';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Request } from 'express';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { StatisticService } from './models/statistic/statistic.service';
 import { UrlService } from './models/url/url.service';
-import { PORT } from './common/constants/constants';
+import { PORT, STATISTIC_URL } from './common/constants/constants';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -53,7 +52,7 @@ export class AppService {
   }
 
   private async findLocationByReqIP(ip: string): Promise<AxiosResponse<any>> {
-    return await firstValueFrom(this.httpService.get(`https://ipapi.co/${ip}/json/`));
+    return await firstValueFrom(this.httpService.get(`${this.configService.get(STATISTIC_URL)}/${ip}/json/`));
   }
 
   private isValidLocation(location: any): boolean {

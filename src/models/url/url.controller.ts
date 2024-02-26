@@ -9,7 +9,7 @@ import { Url } from './entities/url.entity';
 import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
 
 @ApiTags('Url')
-@Controller('v1/api/urls')
+@Controller('v1/api/shortener/urls')
 export class UrlController {
   constructor(private readonly urlService: UrlService) { }
 

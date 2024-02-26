@@ -5,7 +5,7 @@ import { ApiResponseListDto, ApiResponseErrorDto } from 'src/common/dtos/api-res
 import { Statistic } from './entities/statistic.entity';
 
 @ApiTags('Statistic')
-@Controller('v1/api/statistics')
+@Controller('v1/api/shortener/statistics')
 export class StatisticController {
   constructor(private readonly statisticService: StatisticService) { }
 

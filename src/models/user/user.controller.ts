@@ -8,7 +8,7 @@ import { User } from './entities/user.entity';
 import { ApiResponseErrorDto, ApiResponseListDto, ApiResponseObjectDto } from 'src/common/dtos/api-response.dto';
 
 @ApiTags('User')
-@Controller('v1/api/users')
+@Controller('v1/api/shortener/users')
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
