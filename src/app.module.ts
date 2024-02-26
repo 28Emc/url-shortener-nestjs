@@ -12,6 +12,8 @@ import { Url } from './models/url/entities/url.entity';
 import { User } from './models/user/entities/user.entity';
 import { Statistic } from './models/statistic/entities/statistic.entity';
 import { HttpModule } from '@nestjs/axios';
+import { RedisModule } from './providers/cache/redis/redis.module';
+const redisStore = require('cache-manager-redis-store').redisStore;
 
 @Module({
   imports: [
@@ -24,7 +26,8 @@ import { HttpModule } from '@nestjs/axios';
     UserModule,
     StatisticModule,
     TypeOrmModule.forFeature([User, Url, Statistic], CORE),
-    HttpModule
+    HttpModule,
+    RedisModule
   ],
   controllers: [AppController],
   providers: [AppService],

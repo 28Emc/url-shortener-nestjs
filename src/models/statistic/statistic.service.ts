@@ -1,11 +1,13 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateStatisticDto } from './dto/create-statistic.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CORE } from 'src/common/constants/constants';
+import { CORE, STATISTIC_LIST_CACHE, STATISTIC_LIST_CACHE_TTL } from 'src/common/constants/constants';
 import { Repository } from 'typeorm';
 import { Url } from '../url/entities/url.entity';
 import { Statistic } from './entities/statistic.entity';
 import { ApiResponseListDto, ApiResponseObjectDto } from 'src/common/dtos/api-response.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class StatisticService {
@@ -13,7 +15,8 @@ export class StatisticService {
     @InjectRepository(Url, CORE)
     private readonly urlRepository: Repository<Url>,
     @InjectRepository(Statistic, CORE)
-    private readonly statisticRepository: Repository<Statistic>
+    private readonly statisticRepository: Repository<Statistic>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) { }
 
   async create(createStatisticDto: CreateStatisticDto): Promise<ApiResponseObjectDto<Statistic>> {
@@ -40,7 +43,14 @@ export class StatisticService {
   }
 
   async findAll(): Promise<ApiResponseListDto<Statistic>> {
-    const statisticList: Statistic[] = await this.statisticRepository.find({
+    let statisticList: Statistic[] = await this.cacheManager.get<Statistic[]>(STATISTIC_LIST_CACHE);
+    if (statisticList && statisticList.length > 0) {
+      return {
+        'message': 'Statistic data retrieved (from cache) successfully',
+        'detail': statisticList
+      };
+    }
+    statisticList = await this.statisticRepository.find({
       loadRelationIds: {
         relations: ['url'],
         disableMixedMap: true
@@ -52,10 +62,36 @@ export class StatisticService {
         'detail': 'Internal server error'
       });
     }
+    this.cacheManager.set(STATISTIC_LIST_CACHE, statisticList, STATISTIC_LIST_CACHE_TTL);
     return {
       'message': 'Statistic data retrieved successfully',
       'detail': statisticList
     };
+
+    /* let statisticList: Statistic[] = await this.cacheManager.get(STATISTIC_LIST_CACHE);
+    if (statisticList) {
+      return {
+        'message': 'Statistic data retrieved successfully',
+        'detail': statisticList
+      };
+    }
+    statisticList = await this.statisticRepository.find({
+      loadRelationIds: {
+        relations: ['url'],
+        disableMixedMap: true
+      }
+    });
+    if (!statisticList) {
+      throw new InternalServerErrorException({
+        'message': 'There was an error while fetching statistic',
+        'detail': 'Internal server error'
+      });
+    }
+    this.cacheManager.set(STATISTIC_LIST_CACHE, statisticList, STATISTIC_LIST_CACHE_TTL);
+    return {
+      'message': 'Statistic data retrieved successfully',
+      'detail': statisticList
+    }; */
   }
 
   async findByUrlId(urlId: string): Promise<ApiResponseListDto<Statistic>> {
