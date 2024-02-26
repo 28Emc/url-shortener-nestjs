@@ -7,13 +7,9 @@ export class CreateUserDto {
     @IsEmail({}, { message: CustomValidationErrors.user.email.isEmail })
     email: string;
 
-    @ApiProperty({ name: 'username', example: 'fake_username' })
-    @IsNotEmpty({ message: CustomValidationErrors.user.username.isNotEmpty })
-    username: string;
-
-    @ApiProperty({ name: 'password', example: 'fake_password' })
-    @IsNotEmpty({ message: CustomValidationErrors.user.password.isNotEmpty })
-    password: string;
+    @ApiProperty({ name: 'fullName', example: 'fake_fullname' })
+    @IsNotEmpty({ message: CustomValidationErrors.user.fullName.isNotEmpty })
+    fullName: string;
 
     @ApiProperty({ name: 'createdBy', example: 'fake_created_by' })
     @IsNotEmpty({ message: CustomValidationErrors.user.createdBy.isNotEmpty })

@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
-  const globalPrefix = `${configService.get<string>(VERSION)}/api`;
+  const globalPrefix = `${configService.get<string>(VERSION)}/api/shortener`;
   const hostDomain = process.env.NODE_ENV === LOCAL ? `${configService.get<string>(BASE_URL)}:${configService.get<string>(PORT)}` : `${configService.get<string>(BASE_URL)}`;
   const serverDescription = process.env.NODE_ENV === LOCAL ? 'Localhost server' : 'Production server';
   const swConfig = new DocumentBuilder()

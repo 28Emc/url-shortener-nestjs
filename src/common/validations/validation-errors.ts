@@ -3,8 +3,8 @@ export const CustomValidationErrors = {
         "email": {
             "isEmail": "Invalid email"
         },
-        "username": {
-            "isNotEmpty": "Username required"
+        "fullName": {
+            "isNotEmpty": "Full name required"
         },
         "password": {
             "isNotEmpty": "Password required"
@@ -26,8 +26,8 @@ export const CustomValidationErrors = {
         "uuid": {
             "isNotEmpty": "UUID required"
         },
-        "userId": {
-            "isNotEmpty": "User ID required"
+        "userUUID": {
+            "isNotEmpty": "User UUID required"
         },
         "originalUrl": {
             "isNotEmpty": "Original url required"

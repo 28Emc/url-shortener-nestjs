@@ -5,21 +5,17 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryG
 
 @Entity({ name: 'users' })
 export class User {
-    @ApiProperty({ name: 'userId', type: 'number' })
-    @PrimaryGeneratedColumn({ name: 'u_id' })
-    userId: number;
+    @ApiProperty({ name: 'uuid', type: 'uuid' })
+    @PrimaryGeneratedColumn('uuid', { name: 'u_uuid' })
+    uuid: string;
+
+    @ApiProperty({ name: 'fullName', type: 'string' })
+    @Column({ name: 'u_fullname', type: 'varchar', length: 255 })
+    fullName: string;
 
     @ApiProperty({ name: 'email', type: 'string' })
-    @Column({ name: 'u_email', type: 'varchar', length: 255 })
+    @Column({ name: 'u_email', type: 'varchar', length: 255, unique: true })
     email: string;
-
-    @ApiProperty({ name: 'username', type: 'string' })
-    @Column({ name: 'u_username', type: 'varchar', length: 255 })
-    username: string;
-
-    @ApiProperty({ name: 'password', type: 'string' })
-    @Column({ name: 'u_password', type: 'varchar', length: 255 })
-    password: string;
 
     @ApiProperty({ name: 'status', enum: Status })
     @Column({ name: 'u_status', type: 'enum', enum: Status, default: Status.ACTIVE })

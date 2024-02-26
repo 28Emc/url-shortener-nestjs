@@ -21,3 +21,4 @@ export const STATISTIC_LIST_CACHE = 'STATISTIC_LIST_CACHE';
 export const STATISTIC_LIST_CACHE_TTL = 1000 * 10;
 export const REDIS_HOST = 'REDIS_HOST';
 export const REDIS_PORT = 'REDIS_PORT';
+export const STATISTIC_URL = 'STATISTIC_URL';

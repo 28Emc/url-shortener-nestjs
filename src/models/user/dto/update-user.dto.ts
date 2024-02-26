@@ -7,9 +7,9 @@ export class UpdateUserDto {
     @IsEmail({}, { message: CustomValidationErrors.user.email.isEmail })
     email: string;
 
-    @ApiProperty({ name: 'username', example: 'fake_username' })
-    @IsNotEmpty({ message: CustomValidationErrors.user.username.isNotEmpty })
-    username: string;
+    @ApiProperty({ name: 'fullName', example: 'fake_fullname' })
+    @IsNotEmpty({ message: CustomValidationErrors.user.fullName.isNotEmpty })
+    fullName: string;
 
     @ApiProperty({ name: 'modifiedBy', example: 'fake_modified_by' })
     @IsNotEmpty({ message: CustomValidationErrors.user.modifiedBy.isNotEmpty })

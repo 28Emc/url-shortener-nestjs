@@ -20,10 +20,10 @@ export class UrlService {
     private configService: ConfigService
   ) { }
 
-  async createUnlimited(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
+  async create(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
     const userFound: User = await this.userRepository.findOne({
       where: {
-        userId: +createUrlDto.userId
+        uuid: createUrlDto.userUUID
       }
     })
     if (!userFound) {
@@ -58,10 +58,10 @@ export class UrlService {
     };
   }
 
-  async createRestricted(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
+  async createByUser(createUrlDto: CreateUrlDto): Promise<ApiResponseObjectDto<string>> {
     const userFound: User = await this.userRepository.findOne({
       where: {
-        userId: +createUrlDto.userId
+        uuid: createUrlDto.userUUID
       }
     })
     if (!userFound) {
@@ -73,7 +73,7 @@ export class UrlService {
     const previousUrls: Url[] = await this.urlRepository.find({
       where: {
         user: {
-          userId: +createUrlDto.userId
+          uuid: createUrlDto.userUUID
         }
       }
     });
@@ -83,7 +83,7 @@ export class UrlService {
         'detail': 'You have reached the limit for creating more short URLs.'
       });
     }
-    const randomUUID: string = this.generateRandomUUID();
+    const randomUUID: string = this.generateRandomUUID(7);
     const domain: string = this.configService.get<string>(NODE_ENV) === 'local' ?
       `${this.configService.get<string>(BASE_URL)}:${this.configService.get<string>(PORT)}` :
       `${this.configService.get<string>(BASE_URL)}`;
@@ -128,7 +128,7 @@ export class UrlService {
     };
   }
 
-  async findAllByUserId(userId: number): Promise<ApiResponseListDto<Url>> {
+  async findAllByUserUUID(uuid: string): Promise<ApiResponseListDto<Url>> {
     const urlList: Url[] = await this.urlRepository.find({
       loadRelationIds: {
         relations: ['user'],
@@ -136,7 +136,7 @@ export class UrlService {
       },
       where: {
         user: {
-          userId: userId
+          uuid: uuid
         }
       }
     });
@@ -247,9 +247,9 @@ export class UrlService {
     };
   }
 
-  async remove(uuid: string): Promise<ApiResponseObjectDto<string>> {
+  async remove(code: string): Promise<ApiResponseObjectDto<string>> {
     const deletedUrl: DeleteResult = await this.urlRepository.delete({
-      uuid: uuid
+      uuid: code
     });
     if (!deletedUrl.affected) {
       throw new NotFoundException({
@@ -259,7 +259,7 @@ export class UrlService {
     }
     return {
       'message': 'Url deleted successfully',
-      'detail': ''
+      'detail': deletedUrl.affected.toString()
     };
   }
 

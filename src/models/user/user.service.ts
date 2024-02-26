@@ -8,7 +8,6 @@ import { Repository, UpdateResult } from 'typeorm';
 import { UpdateStatusUserDto } from './dto/update-status-user.dto';
 import { Status } from 'src/common/enums/enums';
 import { DateTime } from "luxon";
-import * as bcrypt from "bcrypt";
 import { ApiResponseListDto, ApiResponseObjectDto } from 'src/common/dtos/api-response.dto';
 
 @Injectable()
@@ -30,28 +29,26 @@ export class UserService {
           description: 'There was an error while registering user'
         });
     }
-    createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
     const user: User = this.userRepository.create(createUserDto);
-    const { password, ...createdUser } = await this.userRepository.save({
+    const createdUser = await this.userRepository.save({
       ...user
     });
-    if (!createdUser.userId) {
+    if (!createdUser.uuid) {
       throw new InternalServerErrorException('Application error', {
         description: 'There was an error while creating the user'
       });
     }
+
+    // TODO: REGISTER USER INTO SECURITY DB
+
     return {
       'message': 'User created successfully',
-      'detail': ''
+      'detail': createdUser.uuid
     };
   }
 
   async findAll(): Promise<ApiResponseListDto<User>> {
-    const userList: User[] = await this.userRepository.find({
-      select: {
-        password: false
-      }
-    });
+    const userList: User[] = await this.userRepository.find();
     if (!userList) {
       throw new InternalServerErrorException('Application error', {
         description: 'There was an error while fetching users'
@@ -63,13 +60,10 @@ export class UserService {
     };
   }
 
-  async findOne(id: number): Promise<ApiResponseObjectDto<User>> {
+  async findOne(uuid: string): Promise<ApiResponseObjectDto<User>> {
     const userFound: User = await this.userRepository.findOne({
       where: {
-        userId: id
-      },
-      select: {
-        password: false
+        uuid: uuid
       }
     });
     if (!userFound) {
@@ -83,9 +77,9 @@ export class UserService {
     };
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<ApiResponseObjectDto<string>> {
+  async update(uuid: string, updateUserDto: UpdateUserDto): Promise<ApiResponseObjectDto<string>> {
     const updatedUser: UpdateResult = await this.userRepository.update({
-      userId: id
+      uuid: uuid
     }, {
       ...updateUserDto
     });
@@ -94,15 +88,18 @@ export class UserService {
         description: 'There was an error while updating the user'
       });
     }
+
+    // TODO: UPDATE USER INTO SECURITY DB
+
     return {
       'message': 'User values updated successfully',
-      'detail': ''
+      'detail': updatedUser.affected.toString()
     };
   }
 
-  async remove(id: number, updateStatusDTO: UpdateStatusUserDto): Promise<ApiResponseObjectDto<string>> {
+  async remove(uuid: string, updateStatusDTO: UpdateStatusUserDto): Promise<ApiResponseObjectDto<string>> {
     const deletedUser: UpdateResult = await this.userRepository.update({
-      userId: id
+      uuid: uuid
     }, {
       modifiedBy: updateStatusDTO.modifiedBy,
       deletedAt: DateTime.now(),
@@ -114,15 +111,18 @@ export class UserService {
         description: 'There was an error while deleting the user'
       });
     }
+
+    // TODO: DISABLE USER ACCOUNT FROM SECURITY DB
+
     return {
       'message': 'User removed successfully',
-      'detail': ''
+      'detail': deletedUser.affected.toString()
     };
   }
 
-  async restore(id: number, updateStatusDTO: UpdateStatusUserDto): Promise<ApiResponseObjectDto<string>> {
+  async restore(uuid: string, updateStatusDTO: UpdateStatusUserDto): Promise<ApiResponseObjectDto<string>> {
     const restoredUser: UpdateResult = await this.userRepository.update({
-      userId: id
+      uuid: uuid
     }, {
       modifiedBy: updateStatusDTO.modifiedBy,
       deletedAt: null,
@@ -134,9 +134,12 @@ export class UserService {
         description: 'There was an error while restoring the user'
       });
     }
+
+    // TODO: RESTORE USER ACCOUNT FROM SECURITY DB
+
     return {
       'message': 'User restored successfully',
-      'detail': ''
+      'detail': restoredUser.affected.toString()
     };
   }
 }
